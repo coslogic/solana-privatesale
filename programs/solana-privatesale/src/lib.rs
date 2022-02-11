@@ -21,7 +21,7 @@ pub mod solana_privatesale {
         Ok(())
     }
 
-    pub fn new_whitelist(ctx: Context<NewWhitelist>) -> ProgramResult {
+    pub fn new_whitelist(ctx: Context<NewWhitelist>, whitelist_account_bump: u8) -> ProgramResult {
         let admin = &ctx.accounts.authority;
         require!(*admin.key == admin::ID, ErrorCode::OnlyAdmin);
 
@@ -47,7 +47,7 @@ pub struct WhitelistCountContext<'info> {
         ],
         bump = whitelistcount_account_bump,
         payer = authority,
-        space = 10240
+        space = 16
     )]
     whitelist_count: Account<'info, WhitelistCount>,
 

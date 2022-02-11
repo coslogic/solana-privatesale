@@ -11,7 +11,7 @@ declare_id!("99pSfskPW3xEgtFyztupL6TjeCKSRYEAe41MwGp7Su3s");
 pub mod solana_privatesale {
     use super::*;
 
-    pub fn create_whitelist_count(ctx: Context<WhitelistCountContext>) -> ProgramResult {
+    pub fn create_whitelist_count(ctx: Context<WhitelistCountContext>, whitelistcount_account_bump: u8) -> ProgramResult {
         let authority = &ctx.accounts.authority;
         require!(*authority.key == admin::ID, ErrorCode::OnlyAdmin);
 

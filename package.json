@@ -1,7 +1,11 @@
 {
+    "scripts": {
+        "interact": "ts-node ./app/interact.ts"
+    },
     "dependencies": {
         "@project-serum/anchor": "^0.20.1",
-        "dotenv": "^16.0.0"
+        "dotenv": "^16.0.0",
+        "ts-node": "^10.5.0"
     },
     "devDependencies": {
         "@types/mocha": "^9.0.0",

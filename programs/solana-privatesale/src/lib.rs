@@ -117,7 +117,7 @@ pub enum Role {
 pub mod admin {
     use anchor_lang::prelude::declare_id;
 
-    declare_id!("5qhYVwGSYK6Thc4VQkoa5yZD9tVBaG1GuXarrARqNe4W");
+    declare_id!("4KAaX3a7eoMy9nyb2YXH3DmhrHfH8uiyHitWCM9aoi62");
 }
 
 #[error]

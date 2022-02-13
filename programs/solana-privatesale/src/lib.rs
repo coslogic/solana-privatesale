@@ -2,7 +2,8 @@ use {
     anchor_lang::prelude::*,
     std::{
         collections::BTreeMap
-    }
+    },
+    borsh::{BorshDeserialize, BorshSerialize}
 };
 
 declare_id!("99pSfskPW3xEgtFyztupL6TjeCKSRYEAe41MwGp7Su3s");
@@ -30,11 +31,28 @@ pub mod solana_privatesale {
 
         let new_whitelist_key = &mut ctx.accounts.new_whitelist_key;
         new_whitelist_key.id = whitelist_count.count;
-        new_whitelist_key.btree_storage = <Vec<u8>>::new();
+
+        let btree = BTreeMap::<Pubkey, UserInfo>::new();
+        new_whitelist_key.btree_storage = btree.try_to_vec().unwrap();
 
         Ok(())
     }
 
+    pub fn insert_to_whitelist(ctx: Context<InsertToWhitelist>, pk: Pubkey, info: UserInfo) -> ProgramResult {
+        let admin = &ctx.accounts.authority;
+        require!(*admin.key == admin::ID, ErrorCode::OnlyAdmin);
+
+        let whitelist_account = &mut ctx.accounts.whitelist_account;
+        let mut btree: BTreeMap<Pubkey, UserInfo> = BorshDeserialize::try_from_slice(&whitelist_account.btree_storage[..]).unwrap();
+        btree.insert(pk, info);
+
+        let new_data = btree.try_to_vec().unwrap();
+        require!(new_data.len() + 2 <= 10240, ErrorCode::WhitelistOverflow);
+
+        whitelist_account.btree_storage = new_data;
+
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -80,6 +98,15 @@ pub struct NewWhitelist<'info> {
     system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+#[instruction(pk: Pubkey, info: UserInfo)]
+pub struct InsertToWhitelist<'info> {
+    #[account(mut)]
+    authority: Signer<'info>,
+
+    whitelist_account: Account<'info, Whitelist>
+}
+
 // Data
 
 #[account]
@@ -99,19 +126,9 @@ pub struct Whitelist {
     Clone
 )] 
 pub struct UserInfo {
-    role: Role,
+    role: String,
     ref_key: Pubkey,
     other_keys: [Pubkey; 5]
-}
-
-#[derive(
-    anchor_lang::AnchorSerialize,
-    anchor_lang::AnchorDeserialize,
-    Clone
-)] 
-pub enum Role {
-    CoreTeam,
-    Community
 }
 
 pub mod admin {
@@ -126,5 +143,8 @@ pub enum ErrorCode {
     OnlyAdmin,
 
     #[msg("Admin Sign Required")]
-    AdminSignRequired
+    AdminSignRequired,
+
+    #[msg("Whitelist Overflow")]
+    WhitelistOverflow
 }

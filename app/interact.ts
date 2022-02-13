@@ -1,8 +1,8 @@
 import * as anchor from "@project-serum/anchor";
-import { SolanaPrivatesale } from "../target/types/solana_privatesale";
+import { SolanaPrivatesale } from '../target/types/solana_privatesale';
 import dotenv from 'dotenv';
 import { getProgram, getProvider } from './util';
-import { deserializeWhitelistCount } from './serialize';
+import { deserializeWhitelistCount, deserializeWhitelist } from './serialize';
 
 dotenv.config();
 
@@ -10,6 +10,7 @@ dotenv.config();
 const PROGRAM_ID = new anchor.web3.PublicKey('99pSfskPW3xEgtFyztupL6TjeCKSRYEAe41MwGp7Su3s');
 const AUTHORITY = new anchor.web3.PublicKey('4KAaX3a7eoMy9nyb2YXH3DmhrHfH8uiyHitWCM9aoi62');
 const WHITELISTCOUNT = new anchor.web3.PublicKey('78twiLSpovbeKg42diix5JEMiWRrEPqFuX9Eiaw2QyKr')
+const WHITELIST1 = new anchor.web3.PublicKey('68NoM251KZTvkK6PcuSDHAPcYnCwfbY9jyqghjNmbBBJ');
 
 async function createWhitelistCount(
   program: anchor.Program<SolanaPrivatesale>,
@@ -61,6 +62,29 @@ async function newWhitelist(
   });
 }
 
+async function insertToWhitelist(
+  connection: anchor.web3.Connection,
+  provider: anchor.Provider,
+  program: anchor.Program<SolanaPrivatesale>
+) {
+  const randomUser = new anchor.web3.Account();
+  const randomRef = new anchor.web3.Account();
+  return program.rpc.insertToWhitelist(
+    randomUser.publicKey,
+    {
+      role: 'Community',
+      refKey: randomRef.publicKey,
+      otherKeys: [randomRef.publicKey, randomRef.publicKey, randomRef.publicKey, randomRef.publicKey, randomRef.publicKey]
+    }, 
+    {
+      accounts: {
+        authority: provider.wallet.publicKey,
+        whitelistAccount: WHITELIST1
+      }
+    }
+  )
+}
+
 async function main() {
   const connection = new anchor.web3.Connection(
     "http://localhost:8899",
@@ -73,11 +97,19 @@ async function main() {
   );
   const program = getProgram(provider);
 
+  //TODO: 1st step
   // const txHash0 = await createWhitelistCount(program, provider);
   // console.log(txHash0);
 
-  const txHash1 = await newWhitelist(connection, provider, program);
-  console.log(txHash1);
+  //TODO: 2nd step
+  // const txHash1 = await newWhitelist(connection, provider, program);
+  // console.log(txHash1);
+  
+    // const txHash2 = await insertToWhitelist(connection, provider, program);
+    // console.log(txHash2);
+
+  const x = await deserializeWhitelistCount(connection, program, WHITELISTCOUNT);
+  console.log(x);
 }
 
 main()

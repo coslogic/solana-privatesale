@@ -11,3 +11,12 @@ export async function deserializeWhitelistCount(
     const deData = await program.account.whitelistCount.fetch(pubkey);
     return deData;
 }
+
+export async function deserializeWhitelist(
+    connection: anchor.web3.Connection,
+    program: anchor.Program<SolanaPrivatesale>,
+    pubkey: anchor.web3.PublicKey
+) {
+    const deData = await program.account.whitelist.fetch(pubkey);
+    return deData;
+}
